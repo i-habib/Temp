@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quanta — an embedded time-series database</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #fafbfc;
+    --border: #e4e7ec;
+    --text: #14171f;
+    --muted: #5c6470;
+    --accent: #2f6feb;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1014;
+      --surface: #14171d;
+      --border: #262b34;
+      --text: #e8eaee;
+      --muted: #9099a6;
+      --accent: #74a3ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 62rem; margin: 0 auto; padding: 0 1.5rem; }
+
+  nav {
+    display: flex; align-items: center; gap: 1.5rem;
+    padding: 1.25rem 0; border-bottom: 1px solid var(--border);
+  }
+  .logo { font-weight: 650; letter-spacing: -.02em; margin-right: auto; }
+  .logo span { color: var(--accent); }
+  nav a { color: var(--muted); text-decoration: none; font-size: .92rem; }
+  nav a:hover { color: var(--text); }
+  nav svg { width: 18px; height: 18px; vertical-align: -4px; }
+
+  header { padding: 5rem 0 4rem; border-bottom: 1px solid var(--border); }
+  h1 {
+    font-size: clamp(2.1rem, 5vw, 3.1rem); line-height: 1.1;
+    letter-spacing: -.035em; font-weight: 660; margin: 0 0 1.1rem; max-width: 20ch;
+  }
+  .lede { font-size: 1.14rem; color: var(--muted); max-width: 56ch; margin: 0 0 2rem; }
+  .cta { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; }
+  .btn {
+    display: inline-block; padding: .6rem 1.15rem; border-radius: 7px;
+    background: var(--accent); color: #fff; text-decoration: none;
+    font-size: .93rem; font-weight: 550;
+  }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  code.inline {
+    font-family: var(--mono); font-size: .86rem; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 5px; padding: .2rem .45rem;
+  }
+
+  section { padding: 4.5rem 0; border-bottom: 1px solid var(--border); }
+  .eyebrow {
+    font-size: .74rem; text-transform: uppercase; letter-spacing: .11em;
+    color: var(--muted); font-weight: 600; margin: 0 0 .75rem;
+  }
+  h2 {
+    font-size: 1.75rem; letter-spacing: -.02em; font-weight: 620;
+    margin: 0 0 1rem; max-width: 24ch;
+  }
+  section > .wrap > p { color: var(--muted); max-width: 62ch; margin: 0 0 1rem; }
+
+  /* ---- the icon cards ---- */
+  .cards {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1.1rem; margin-top: 2.5rem;
+  }
+  .card {
+    border: 1px solid var(--border); border-radius: 11px;
+    padding: 1.5rem; background: var(--surface);
+  }
+  .icon {
+    width: 40px; height: 40px; border-radius: 9px;
+    display: grid; place-items: center; margin-bottom: 1rem;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+  }
+  .icon svg { width: 20px; height: 20px; }
+  .card h3 { font-size: 1rem; font-weight: 600; margin: 0 0 .4rem; }
+  .card p { color: var(--muted); font-size: .93rem; margin: 0; }
+
+  .stats { display: flex; gap: 3rem; flex-wrap: wrap; margin-top: 2.5rem; }
+  .stat .n { font-size: 1.9rem; font-weight: 650; letter-spacing: -.03em; }
+  .stat .l { color: var(--muted); font-size: .88rem; }
+
+  pre {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
+    padding: 1.1rem 1.25rem; overflow-x: auto; font-family: var(--mono);
+    font-size: .86rem; line-height: 1.6; margin: 1.75rem 0 0;
+  }
+  .tok { color: var(--accent); }
+  .cmt { color: var(--muted); }
+
+  footer { padding: 3rem 0 4rem; color: var(--muted); font-size: .88rem; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="logo">quanta<span>·</span>db</div>
+    <a href="#ingest">Docs</a>
+    <a href="#storage">Benchmarks</a>
+    <a href="#">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.67 5.58.67 11.85c0 5.02 3.24 9.27 7.74 10.77.57.1.78-.24.78-.55l-.02-1.93c-3.15.69-3.81-1.52-3.81-1.52-.52-1.32-1.26-1.67-1.26-1.67-1.03-.7.08-.69.08-.69 1.14.08 1.74 1.17 1.74 1.17 1.01 1.74 2.66 1.24 3.31.95.1-.74.4-1.24.72-1.53-2.51-.29-5.15-1.26-5.15-5.6 0-1.24.44-2.25 1.16-3.04-.12-.29-.5-1.44.11-3 0 0 .95-.3 3.1 1.16.9-.25 1.86-.37 2.82-.38.96 0 1.92.13 2.82.38 2.15-1.46 3.1-1.16 3.1-1.16.61 1.56.23 2.71.11 3 .72.79 1.16 1.8 1.16 3.04 0 4.35-2.65 5.31-5.17 5.59.41.35.77 1.05.77 2.11l-.01 3.13c0 .31.2.66.79.55 4.5-1.5 7.73-5.75 7.73-10.77C23.33 5.58 18.27.5 12 .5z"/></svg>
+      GitHub
+    </a>
+  </nav>
+</div>
+
+<header>
+  <div class="wrap">
+    <h1>The embedded database for time-series data.</h1>
+    <p class="lede">
+      Quanta runs in your process, not next to it. One file on disk, no daemon,
+      no cluster to operate — SQLite&rsquo;s deployment story with a storage
+      engine built for metrics.
+    </p>
+    <div class="cta">
+      <a class="btn" href="#ingest">Read the internals</a>
+      <a class="btn ghost" href="#">Documentation</a>
+      <code class="inline">cargo add quanta</code>
+    </div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>Built for a write-heavy, read-narrow workload.</h2>
+    <p>
+      Metrics workloads look nothing like OLTP: writes are append-only and
+      relentless, reads touch a narrow window of recent time. Quanta&rsquo;s three
+      subsystems are each shaped around that asymmetry.
+    </p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
+        <h3>Blazing-fast ingest</h3>
+        <p>
+          Durable, low-latency writes that never block your application, with
+          zero configuration required.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+            <path d="M3 5v14a9 3 0 0 0 18 0V5"/>
+            <path d="M3 12a9 3 0 0 0 18 0"/>
+          </svg>
+        </div>
+        <h3>Efficient storage</h3>
+        <p>
+          Best-in-class compression keeps your historical data small without
+          sacrificing query performance.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+        </div>
+        <h3>Lightning queries</h3>
+        <p>
+          A smart planner cuts through your data to deliver results in
+          milliseconds, at any scale.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ingest">
+  <div class="wrap">
+    <p class="eyebrow">01 — Ingest</p>
+    <h2>Every write lands in two places at once.</h2>
+    <p>
+      A point is appended to an on-disk write-ahead log, which is what makes it
+      durable, and simultaneously inserted into an in-memory memtable, which is
+      what makes it immediately queryable. Neither path waits for the other.
+    </p>
+    <p>
+      When the memtable reaches 4&nbsp;MB it is flushed to an immutable block and
+      the corresponding WAL segment is truncated. Because blocks never change
+      after they are written, readers need no locks.
+    </p>
+  </div>
+</section>
+
+<section id="storage">
+  <div class="wrap">
+    <p class="eyebrow">02 — Storage</p>
+    <h2>Columns are stored apart, so they compress together.</h2>
+    <p>
+      A block opens with an 8-byte header, then stores its timestamps
+      delta-of-delta encoded and its values XOR-encoded, and closes with a footer
+      holding the minimum and maximum timestamp in the block.
+    </p>
+    <p>
+      Keeping the two columns separate is what makes this work: adjacent
+      timestamps differ by a near-constant interval and adjacent values by very
+      little, so each column compresses roughly 11&times; better than the same
+      points stored row-wise.
+    </p>
+  </div>
+</section>
+
+<section id="queries">
+  <div class="wrap">
+    <p class="eyebrow">03 — Queries</p>
+    <h2>The fastest block is the one you never read.</h2>
+    <p>
+      The planner reads each block&rsquo;s footer before its body. If the
+      block&rsquo;s min/max range does not overlap the query window, the entire
+      block is skipped without decoding a single point.
+    </p>
+    <p>
+      For a typical dashboard query — the last six hours out of a year of
+      retention — that rejects hundreds of blocks and decodes two.
+    </p>
+<pre><span class="cmt">// a six-hour window over a year of retention</span>
+<span class="tok">let</span> series = db.query(<span class="tok">"cpu.user"</span>)
+    .range(now - <span class="tok">6</span>.hours(), now)
+    .rollup(Rollup::Mean, <span class="tok">60</span>.seconds())?;
+<span class="cmt">// 2 blocks decoded, 412 skipped, 1.4 ms</span></pre>
+
+    <div class="stats">
+      <div class="stat"><div class="n">11&times;</div><div class="l">compression vs. row storage</div></div>
+      <div class="stat"><div class="n">1.4 ms</div><div class="l">p50 dashboard query</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">daemons to operate</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Quanta is a fictional product built to demonstrate a documentation technique.</div>
+</footer>
+
+</body>
+</html>

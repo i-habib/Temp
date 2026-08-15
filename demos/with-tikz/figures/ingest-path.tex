@@ -1,0 +1,23 @@
+% Ingest path: a write lands in two places, and only the memtable becomes a block.
+\definecolor{accent}{HTML}{2F6FEB}
+\begin{tikzpicture}[
+  font=\small\sffamily,
+  box/.style={draw, rounded corners=2pt, line width=.6pt, inner sep=5pt,
+              minimum height=10mm, minimum width=24mm, align=center},
+  flow/.style={-{Stealth[length=2mm,width=1.6mm]}, line width=.7pt},
+  lbl/.style={font=\scriptsize\sffamily, inner sep=2pt},
+]
+  \node[box] (w) at (0,0) {writer};
+  \node[box] (wal) at (36mm, 11mm) {WAL\\[-1pt]{\scriptsize on disk}};
+  \node[box] (mem) at (36mm,-11mm) {memtable\\[-1pt]{\scriptsize in RAM}};
+  \node[box, draw=accent, text=accent] (blk) at (78mm,-11mm)
+        {block\\[-1pt]{\scriptsize immutable}};
+
+  \draw[flow] (w.east) to[out=25, in=180]  node[lbl, above, pos=.34] {durability} (wal.west);
+  \draw[flow] (w.east) to[out=-25, in=180] node[lbl, below, pos=.34] {queryable} (mem.west);
+  \draw[flow, draw=accent] (mem) -- node[lbl, above] {flush at 4\,MB} (blk);
+
+  % Once the block is durable the WAL segment is no longer needed.
+  \draw[flow, dash pattern=on 2pt off 2pt] (blk.north) --
+        node[lbl, right, pos=.55] {truncates} (blk.north |- wal.east) -- (wal.east);
+\end{tikzpicture}

@@ -1,0 +1,28 @@
+{
+  "marketplace": "habib-tools",
+  "entries": [
+    {
+      "name": "tikz-figures",
+      "displayName": "TikZ Figures",
+      "version": "0.1.0",
+      "description": "Replace decorative icons on technical web pages with real explanatory diagrams: a subagent authors TikZ and compiles it to theme-aware inline SVG.",
+      "source": "local",
+      "path": "./plugins/tikz-figures",
+      "license": "MIT",
+      "author": {
+        "name": "i-habib"
+      },
+      "keywords": [
+        "tikz",
+        "diagram",
+        "svg",
+        "web",
+        "documentation"
+      ],
+      "tags": [
+        "design",
+        "docs"
+      ]
+    }
+  ]
+}
