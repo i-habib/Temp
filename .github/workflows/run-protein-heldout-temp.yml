@@ -1,0 +1,35 @@
+name: run-protein-heldout-temp
+
+on:
+  push:
+    branches:
+      - claude/tikz-diagram-skill-plugin-ie0h6u
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: benchmark-heldout-exp-20260824
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -q numpy pandas scipy scikit-learn tabulate
+      - name: Clone SynFit
+        run: git clone --depth 1 https://github.com/luo-group/SynFit.git synfit
+      - name: Run experiment
+        run: python heldout_runner.py
+      - name: Commit results to experiment branch
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add heldout_*.csv heldout_summary.md
+          git commit -m "Add real held-out protein transfer results" || exit 0
+          git push origin HEAD:benchmark-heldout-exp-20260824
